@@ -60,6 +60,8 @@ def draw_triangle(x, y):
     ax2.clear()
     ax1.set_xlim([mu_min, mu_max])
     ax1.set_ylim([t_min, t_max])
+    refresh_ax1()
+    ax1.scatter(mu, t, color='blue', s=50, alpha=1)
     ax2.set_xlim([0, 1])
     ax2.set_ylim([0, 1])
 
@@ -125,6 +127,19 @@ def submit(text):
 # Create the main figure
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(18, 7))
 
+def refresh_ax1():
+    ax1.clear()
+    ax1.set_xlim([mu_min, mu_max])
+    ax1.set_ylim([t_min, t_max])
+    ax1.set_xlabel('$\mu$')
+    ax1.set_ylabel('$t$')
+    ax1.set_xticks(np.arange(mu_min, mu_max+0.1, 0.1))
+    ax1.set_yticks(np.arange(t_min, t_max+0.1, 0.1))
+    ax1.set_title('$(\mu, t)$ input space')
+    ax1.plot([mu_min, mu_max], [t_min, t_max], 'k--', alpha=0.5, linewidth=1)
+    ax1.contourf(MU, T, condition, levels=[-1, 0, 1], colors=['lightcoral', 'palegreen'])
+    ax1.axis('equal')
+
 # Create the mu-t plot
 ## Setup
 mu_min = 0.5
@@ -135,36 +150,23 @@ t_max = 1
 mu_vals = np.linspace(mu_min, mu_max, 500)
 t_vals  = np.linspace(t_min,  t_max,  500)
 
-ax1.set_xlim([mu_min, mu_max])
-ax1.set_ylim([t_min, t_max])
 ax2.set_xlim([0, 1])
 ax2.set_ylim([0, 1])
 
-## Set axis markers on ax1
-ax1.set_xlabel('$\mu$')
-ax1.set_ylabel('t')
-ax1.set_xticks(np.arange(mu_min, mu_max+0.1, 0.1))
-ax1.set_yticks(np.arange(t_min, t_max+0.1, 0.1))
-
 ## Plot titles
-ax1.set_title('$\mu-t$ input space')
 ax2.set_title('$(k_1, k_2, k_3)$ output space')
-
-## plotting mu = t line
-ax1.plot([mu_min, mu_max], [t_min, t_max], 'k--', alpha=0.5, linewidth=1)
 
 ## plotting mu*t >= 0.5 contour
 MU, T = np.meshgrid(mu_vals, t_vals)
 condition = MU * T > 0.5
-ax1.contourf(MU, T, condition, levels=[-1, 0, 1], colors=['lightcoral', 'palegreen'])
 
 ## Creating the k1-k2-k3 plot on hover
 fig.canvas.mpl_connect('motion_notify_event', on_hover)
 fig.canvas.mpl_connect('button_press_event', on_click)
 
 
-ax1.axis('equal')
 ax2.axis('equal')
+refresh_ax1()
 
 # Setting up button for t and mu input
 plt.subplots_adjust(bottom=0.3)
