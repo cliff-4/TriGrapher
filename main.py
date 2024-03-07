@@ -6,6 +6,7 @@ import numpy as np
 
 BUTTON_PRESSED = True
 K_LIST = []
+SHOW_EQUILATERAL_TRIANGLE = False
 
 
 def distance(p1, p2):
@@ -38,6 +39,7 @@ def on_click(event):
         x, y = event.xdata, event.ydata
         draw_triangle(x, y)
 
+
 def is_valid(x, y):
     invalid_conditions = [
         x*y < 0.5,
@@ -59,9 +61,9 @@ def draw_triangle(x, y):
     mod_k1 = 1
 
     ax2.clear()
+    refresh_ax1()
     ax1.set_xlim([mu_min, mu_max])
     ax1.set_ylim([t_min, t_max])
-    refresh_ax1()
     ax1.scatter(mu, t, color='red', s=50, alpha=1)
     ax2.set_xlim([0, 1])
     ax2.set_ylim([0, 1])
@@ -69,8 +71,10 @@ def draw_triangle(x, y):
     ax2.set_title('$(k_1, k_2, k_3)$ output space')
     # ax2.axis('equal')
 
-    ax2.plot([0, 0.5], [0, np.sqrt(3)/2], 'k--', alpha=0.5, linewidth=1)
-    ax2.plot([1, 0.5], [0, np.sqrt(3)/2], 'k--', alpha=0.5, linewidth=1)
+    global SHOW_EQUILATERAL_TRIANGLE
+    if SHOW_EQUILATERAL_TRIANGLE:
+        ax2.plot([0, 0.5], [0, np.sqrt(3)/2], 'k--', alpha=0.5, linewidth=1)
+        ax2.plot([1, 0.5], [0, np.sqrt(3)/2], 'k--', alpha=0.5, linewidth=1)
     
 
 
@@ -98,10 +102,18 @@ def draw_triangle(x, y):
 
 
 
-    # Label sides and angle
+    # Label sides
     ax2.text(*midpoint(points[0], points[1]), '$k_1$', ha='center', va='bottom', fontsize=12)
     ax2.text(*midpoint(points[0], points[2]), '$k_2$', ha='left', va='top', fontsize=12)
     ax2.text(*midpoint(points[1], points[2]), '$k_3$', ha='right', va='top', fontsize=12)
+
+    # And angles
+    # f"{angle:.01f}°"
+    a1 = get_angle(points[1], points[0], points[2])
+    a2 = get_angle(points[0], points[1], points[2])
+    ax2.text(*points[0], f"{a1:0.1f}°", ha='right', va='bottom', fontsize=10)
+    ax2.text(*points[1], f"{a2:0.1f}°", ha='left', va='bottom', fontsize=10)
+    ax2.text(*points[2], f"{(180-a1-a2):0.1f}°", ha='center', va='bottom', fontsize=10)
 
     prnt_str1 = f"""
 $\mu$:  {mu:.06f}
@@ -118,6 +130,11 @@ $k_3$:  {distance(points[2], points[1]):.06f}
 
     fig.canvas.draw_idle()
 
+def get_angle(p1, p2, p3):
+    a = distance(p2, p3)
+    b = distance(p1, p3)
+    c = distance(p1, p2)
+    return np.degrees(np.arccos((a**2 + c**2 - b**2) / (2 * a * c)))
 
 def submit(text):
     try:
