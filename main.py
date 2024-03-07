@@ -1,10 +1,11 @@
 import matplotlib.pyplot as plt
 from matplotlib.patches import Polygon
-from matplotlib.widgets import TextBox
+from matplotlib.widgets import TextBox, Button
 import numpy as np
 
 
 BUTTON_PRESSED = True
+K_LIST = []
 
 
 def distance(p1, p2):
@@ -61,7 +62,7 @@ def draw_triangle(x, y):
     ax1.set_xlim([mu_min, mu_max])
     ax1.set_ylim([t_min, t_max])
     refresh_ax1()
-    ax1.scatter(mu, t, color='blue', s=50, alpha=1)
+    ax1.scatter(mu, t, color='red', s=50, alpha=1)
     ax2.set_xlim([0, 1])
     ax2.set_ylim([0, 1])
 
@@ -78,6 +79,12 @@ def draw_triangle(x, y):
         (mod_k1, 0), # right
         (t*mu*mod_k1, t*mod_k1*np.sqrt(1-mu**2)) # top
     ])
+
+    global K_LIST
+    K_LIST = [
+        *points
+    ]
+
     triangle = Polygon(
         points,
         closed=True,
@@ -123,6 +130,39 @@ def submit(text):
     except ValueError:
         print("Invalid input. Please enter a valid float number.")
 
+def save_plot(event):
+    extent = ax2.get_window_extent().transformed(ax2.figure.dpi_scale_trans.inverted())
+    plt.savefig('ax2_figure.png', bbox_inches=extent)
+    extent = ax1.get_window_extent().transformed(ax1.figure.dpi_scale_trans.inverted())
+    plt.savefig('ax1_figure.png', bbox_inches=extent)
+    
+
+
+
+    # fig2, ax = plt.subplots(1, 1, figsize=(10,10))
+    # global K_LIST
+    # triangle = Polygon(
+    #     K_LIST,
+    #     closed=True,
+    #     edgecolor='black',
+    #     facecolor='pink',
+    #     alpha=0.5,
+    #     linewidth=1
+    # )
+    
+    # ax.add_patch(triangle)
+
+    # # Label sides and angle
+    # ax.text(*midpoint(K_LIST[0], K_LIST[1]), '$k_1$', ha='center', va='bottom', fontsize=12)
+    # ax.text(*midpoint(K_LIST[0], K_LIST[2]), '$k_2$', ha='left', va='top', fontsize=12)
+    # ax.text(*midpoint(K_LIST[1], K_LIST[2]), '$k_3$', ha='right', va='top', fontsize=12)
+    
+    # ax.set_ylim(-0.5, 1)
+    
+    # ax.axis('equal')
+    
+    # extent = ax.get_window_extent().transformed(ax.figure.dpi_scale_trans.inverted())
+    # plt.savefig('figure.png', bbox_inches=extent)
 
 # Create the main figure
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(18, 7))
@@ -164,6 +204,10 @@ condition = MU * T > 0.5
 fig.canvas.mpl_connect('motion_notify_event', on_hover)
 fig.canvas.mpl_connect('button_press_event', on_click)
 
+# Adding a button to save the plot
+button_ax = plt.axes([0.8, 0.05, 0.1, 0.075])
+button = Button(button_ax, 'Save Plot')
+button.on_clicked(save_plot)
 
 ax2.axis('equal')
 refresh_ax1()
